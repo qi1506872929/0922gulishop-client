@@ -2,7 +2,8 @@
   <div>
     <Header></Header>
     <router-view></router-view>
-    <Footer></Footer>
+    <!-- <Footer v-show="$route.path !== '/login' && $route.path !== '/register'"></Footer> -->
+    <Footer v-show="!$route.meta.isHidden"></Footer>
   </div>
 </template>
 
@@ -14,6 +15,10 @@ export default {
   components: {
     Header,
     Footer,
+  },
+  mounted(){
+    // this.$store.dispatch("getToStudent");
+    this.$store.dispatch("getCategoryList");
   },
 };
 </script>
