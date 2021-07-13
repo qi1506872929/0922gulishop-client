@@ -22,7 +22,7 @@ export default {
   watch: {
     bannerList: {
       immediate: true, // 没用，为了封装组件添加
-      handler(newVal, oldVal) {
+      handler() {
         this.$nextTick(() => {
           // 在最近的一次页面更新完成之后，执行 nextTick 当中传递的回调函数(只执行一次)，updated 中改变就会执行
           new Swiper(this.$refs.bannerSwiper, {

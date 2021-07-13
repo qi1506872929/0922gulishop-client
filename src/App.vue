@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- <el-button type="danger" icon="el-icon-delete"></el-button> -->
     <Header></Header>
     <router-view></router-view>
     <!-- <Footer v-show="$route.path !== '/login' && $route.path !== '/register'"></Footer> -->

@@ -115,7 +115,13 @@ export default {
         if (this.$route.params){
           location.params = this.$route.params;
         }
-        this.$router.push(location); // 编程式调用
+        // 判断是在home还是search页面跳转的，通过修改replace达到回退到home
+        if (this.$route.path !== '/home'){
+          this.$bus.$emit("initPageNo"); // 重置pageNo参数
+          this.$router.replace(location);
+        } else {
+          this.$router.push(location); // 编程式调用
+        }
       }
     },
     moveOutDiv() {

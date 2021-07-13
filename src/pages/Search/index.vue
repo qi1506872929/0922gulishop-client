@@ -26,7 +26,7 @@
               v-for="(prop, index) in searchParams.props"
               :key="prop"
             >
-              {{ prop.split(":")[1] }}<i @click="removeProps(index)">×</i>
+              {{ prop.split(":")[1] }}<i @click="removeProp(index)">×</i>
             </li>
           </ul>
         </div>
@@ -42,23 +42,31 @@
           <div class="sui-navbar">
             <div class="navbar-inner filter">
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{ active: sortFlag === '1' }">
+                  <a href="javascript:;" @click="changeSort('1')">
+                    综合
+                    <i
+                      v-if="sortFlag === '1'"
+                      class="iconfont"
+                      :class="{
+                        iconup: sortType === 'asc',
+                        icondown: sortType === 'desc',
+                      }"
+                    ></i>
+                  </a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+                <li :class="{ active: sortFlag === '2' }">
+                  <a href="javascript:;" @click="changeSort('2')">
+                    价格
+                    <i
+                      v-if="sortFlag === '2'"
+                      class="iconfont"
+                      :class="{
+                        iconup: sortType === 'asc',
+                        icondown: sortType === 'desc',
+                      }"
+                    ></i>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -68,9 +76,12 @@
               <li class="yui3-u-1-5" v-for="goods in goodsList" :key="goods.id">
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="item.html" target="_blank">
+                    <router-link :to="`/detail/${goods.id}`">
+                      <img v-lazy="goods.defaultImg" />
+                    </router-link>
+                    <!-- <a href="item.html" target="_blank">
                       <img :src="goods.defaultImg" />
-                    </a>
+                    </a> -->
                   </div>
                   <div class="price">
                     <strong>
@@ -79,12 +90,13 @@
                     </strong>
                   </div>
                   <div class="attr">
-                    <a
+                    <router-link :to="`/detail/${goods.id}`">{{ goods.title }}</router-link>
+                    <!-- <a
                       target="_blank"
                       href="item.html"
                       title="促销信息，下单即赠送三个月CIBN视频会员卡！【小米电视新品4A 58 火爆预约中】"
                       >{{ goods.title }}</a
-                    >
+                    > -->
                   </div>
                   <div class="commit">
                     <i class="command">已有<span>2000</span>人评价</i>
@@ -104,7 +116,7 @@
               </li>
             </ul>
           </div>
-          <div class="fr page">
+          <!-- <div class="fr page">
             <div class="sui-pagination clearfix">
               <ul>
                 <li class="prev disabled">
@@ -132,7 +144,14 @@
               </ul>
               <div><span>共10页&nbsp;</span></div>
             </div>
-          </div>
+          </div> -->
+          <Pagination
+            :currentPageNo="searchParams.pageNo"
+            :total="searchInfo.total"
+            :pageSize="searchParams.pageSize"
+            :continueNo="5"
+            @changePageNo="changePageNo"
+          ></Pagination>
         </div>
       </div>
     </div>
@@ -140,7 +159,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
 import SearchSelector from "./SearchSelector/SearchSelector";
 export default {
   name: "Search",
@@ -159,9 +178,9 @@ export default {
         props: [],
         trademark: "",
         // 默认参数
-        order: "1:desc",
+        order: "2:desc",
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 3,
       },
     };
   },
@@ -170,6 +189,10 @@ export default {
   },
   mounted() {
     this.getSearchInfo();
+    this.$bus.$on('initPageNo', this.initPageNo); // 重置pageNo
+  },
+  beforeDestroy(){
+    this.$bus.$off('initPageNo');
   },
   methods: {
     // 请求数据
@@ -189,6 +212,11 @@ export default {
         categoryName,
         keyword,
       };
+      Object.keys(searchParams).forEach((key) => {
+        if (!searchParams[key]) {
+          delete searchParams[key];
+        }
+      });
       this.searchParams = searchParams;
     },
     // 删除搜索名并重新请求数据
@@ -197,7 +225,8 @@ export default {
       this.searchParams.category2Id = undefined;
       this.searchParams.category3Id = undefined;
       this.searchParams.categoryName = undefined;
-      this.$router.push({
+      this.initPageNo(); // 重置当前页为第一页
+      this.$router.replace({
         name: "search",
         params: { ...this.$route.params },
       });
@@ -205,8 +234,9 @@ export default {
     // 删除关键字并重新请求数据
     removeKeyword() {
       this.searchParams.keyword = undefined;
-      this.$bus.$emit('clearKeyword');
-      this.$router.push({
+      this.$bus.$emit("clearKeyword");
+      this.initPageNo(); // 重置当前页为第一页
+      this.$router.replace({
         name: "search",
         query: { ...this.$route.query },
       });
@@ -214,11 +244,13 @@ export default {
     // 根据品牌名搜索数据
     searchForTrademark(trademark) {
       this.searchParams.trademark = `${trademark.tmId}:${trademark.tmName}`;
+      this.initPageNo(); // 重置当前页为第一页
       this.getSearchInfo();
     },
     // 删除品牌名并重新请求数据
     removeTrademark() {
       this.searchParams.trademark = undefined;
+      this.initPageNo(); // 重置当前页为第一页
       this.getSearchInfo();
     },
     // 根据prop搜索数据
@@ -232,19 +264,53 @@ export default {
         return;
       }
       this.searchParams.props.push(prop);
+      this.initPageNo(); // 重置当前页为第一页
       this.getSearchInfo();
     },
     // 删除对应prop并重新请求数据
-    removeProps(index) {
+    removeProp(index) {
       this.searchParams.props.splice(index, 1);
+      this.initPageNo(); // 重置当前页为第一页
+      this.getSearchInfo();
+    },
+    // 改变排序的类型和标志
+    changeSort(sortFlag) {
+      let newOrder = "";
+      // 判断点击的是不是选中的，如果是，更改排序类型，不是，就更换排序标志
+      if (sortFlag === this.sortFlag) {
+        // 是选中的排序标志，更改排序类型
+        newOrder = `${sortFlag}:${this.sortType === "desc" ? "asc" : "desc"}`;
+      } else {
+        // 不是选中的排序标志，更改排序标志，然后默认排序类型desc
+        newOrder = `${sortFlag}:desc`;
+      }
+      this.searchParams.order = newOrder; // 更新数据
+      this.getSearchInfo(); // 重新发送请求
+    },
+    // 更新为第page页的数据
+    changePageNo(page){
+      this.searchParams.pageNo = page;
+      this.getSearchInfo(); // 重新发送请求
+    },
+    // 重置当前页为第一页
+    initPageNo(){
+      this.searchParams.pageNo = 1;
     },
   },
   computed: {
     ...mapGetters(["goodsList"]),
+    ...mapState({ searchInfo: (state) => state.search.searchInfo }),
+    // 获取原来的排序标志和类型，简化代码
+    sortFlag() {
+      return this.searchParams.order.split(":")[0];
+    },
+    sortType() {
+      return this.searchParams.order.split(":")[1];
+    },
   },
   watch: {
     // 监视路由，路由地址变化重新发送请求
-    $route(newVal, oldVal) {
+    $route() {
       this.handlerSearchParams();
       this.getSearchInfo();
     },

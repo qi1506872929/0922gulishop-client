@@ -1,4 +1,4 @@
-import {reqCategoryList, reqToStudent, reqBannerList, reqFloorList} from '@/api'
+import {reqCategoryList, reqBannerList, reqFloorList} from '@/api'
 
 const state = {
     categoryList: [],
@@ -9,12 +9,8 @@ const state = {
 
 const mutations = {
     RECEIVE_CATEGORYLIST(state, categoryList){
-        // state.categoryList = JSON.parse(categoryList).data;
         state.categoryList = categoryList;
     },
-    // RECEIVE_TOSTUDENT(state, toStudent){
-    //     state.toStudent = toStudent.rows;
-    // }
     RESEIVE_BANNERLIST(state, bannerList){
         state.bannerList = bannerList;
     },
@@ -26,19 +22,10 @@ const mutations = {
 const actions = {
     async getCategoryList({commit}){
         const result = await reqCategoryList();
-        // if (result.status){
-        //     commit('RECEIVE_CATEGORYLIST',result.resultData);
-        // }
         if (result.code === 200){
             commit('RECEIVE_CATEGORYLIST',result.data);
         }
     },
-    // async getToStudent({commit}){
-    //     const result = await reqToStudent();
-    //     if (result.status){
-    //         commit('RECEIVE_TOSTUDENT',result.resultData);
-    //     }
-    // }
     async getBannerList({commit}){
         const result = await reqBannerList();
         if (result.code === 200){

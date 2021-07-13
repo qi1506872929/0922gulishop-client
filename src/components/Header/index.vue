@@ -5,7 +5,12 @@
       <div class="container">
         <div class="loginList">
           <p>尚品汇欢迎您！</p>
-          <p>
+          <p v-if="$store.state.user.userInfo.name">
+            <span>欢迎您：</span>
+            <a href="javascript:;">{{$store.state.user.userInfo.name}}</a>
+            <a href="javascript:;" class="register" @click="logout">退出登录</a>
+          </p>
+          <p v-else>
             <span>请</span>
             <!-- <a href="###">登录</a> -->
             <router-link to="/login">登录</router-link>
@@ -14,8 +19,9 @@
           </p>
         </div>
         <div class="typeList">
-          <a href="###">我的订单</a>
-          <a href="###">我的购物车</a>
+          <router-link to="/center">我的订单</router-link>
+          <!-- <a href="###">我的订单</a> -->
+          <a href="javascript:;" @click="$router.push('/shopcart')">我的购物车</a>
           <a href="###">我的尚品汇</a>
           <a href="###">尚品汇会员</a>
           <a href="###">企业采购</a>
@@ -77,17 +83,32 @@ export default {
       if (this.$route.query) {
         location.query = this.$route.query;
       }
-
-      this.$router.push(location);
+      // 判断是在home还是search页面跳转的，通过修改replace达到回退到home
+      if (this.$route.path !== "/home") {
+        this.$bus.$emit("initPageNo"); // 重置pageNo参数
+        this.$router.replace(location);
+      } else {
+        this.$router.push(location); // 编程式调用
+      }
     },
     clearKeyword() {
-      this.keyword = '';
+      this.keyword = "";
     },
+    // 退出登录
+    async logout(){
+      try {
+        await this.$store.dispatch('userLogOut')
+        this.$router.push('/')
+      } catch (error) {
+        alert('退出登录失败' + error.message)
+      }
+      
+    }
   },
   mounted() {
     this.$bus.$on("clearKeyword", this.clearKeyword);
   },
-  beforeDestroy(){
+  beforeDestroy() {
     this.$bus.$off("clearKeyword");
   },
 };
