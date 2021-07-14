@@ -55,7 +55,7 @@ export default [{
             // 只有携带了skuNum和sessionStorage内部有skuIndo数据，才能看到添加购物车成功的界面
             let skuNum = to.query.skuNum
             let skuInfo = sessionStorage.getItem('SKUINFO_KEY')
-            if (skuNum && skuInfo){
+            if (skuNum && skuInfo) {
                 next()
             } else {
                 alert('参数错误')
@@ -74,7 +74,7 @@ export default [{
         // 路由独享守卫
         beforeEnter: (to, from, next) => {
             // 只有从购物车界面才能跳转交易界面
-            if (from.path === '/shopcart'){
+            if (from.path === '/shopcart') {
                 next()
             } else {
                 alert('只有从购物车界面才能跳转交易界面')
@@ -88,7 +88,7 @@ export default [{
         // 路由独享守卫
         beforeEnter: (to, from, next) => {
             // 只有从交易页面(创建订单)才能跳转支付页面
-            if (from.path === '/trade'){
+            if (from.path === '/trade') {
                 next()
             } else {
                 alert('只有从交易页面(创建订单)才能跳转支付页面')
@@ -102,7 +102,7 @@ export default [{
         // 路由独享守卫
         beforeEnter: (to, from, next) => {
             // 只有支付页面才能跳转支付成功页面
-            if (from.path === '/pay'){
+            if (from.path === '/pay') {
                 next()
             } else {
                 alert('只有支付页面才能跳转支付成功页面')
@@ -113,8 +113,7 @@ export default [{
     {
         path: '/center',
         component: () => import('@/pages/Center'),
-        children: [
-            {
+        children: [{
                 path: 'myorder',
                 component: () => import('@/pages/Center/MyOrder')
             },
@@ -131,5 +130,52 @@ export default [{
     {
         path: '/',
         redirect: '/home',
+    },
+    {
+        path: '/communication',
+        component: () => import('@/pages/Communication/Communication'),
+        children: [{
+                path: 'event',
+                component: () => import('@/pages/Communication/EventTest/EventTest'),
+                meta: {
+                    isHideFooter: true
+                },
+            },
+            {
+                path: 'model',
+                component: () => import('@/pages/Communication/ModelTest/ModelTest'),
+                meta: {
+                    isHideFooter: true
+                },
+            },
+            {
+                path: 'sync',
+                component: () => import('@/pages/Communication/SyncTest/SyncTest'),
+                meta: {
+                    isHideFooter: true
+                },
+            },
+            {
+                path: 'attrs-listeners',
+                component: () => import('@/pages/Communication/AttrsListenersTest/AttrsListenersTest'),
+                meta: {
+                    isHideFooter: true
+                },
+            },
+            {
+                path: 'children-parent',
+                component: () => import('@/pages/Communication/ChildrenParentTest/ChildrenParentTest'),
+                meta: {
+                    isHideFooter: true
+                },
+            },
+            {
+                path: 'scope-slot',
+                component: () => import('@/pages/Communication/ScopeSlotTest/ScopeSlotTest'),
+                meta: {
+                    isHideFooter: true
+                },
+            }
+        ],
     },
 ]
